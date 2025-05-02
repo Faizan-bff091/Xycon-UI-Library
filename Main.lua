@@ -154,6 +154,33 @@ function UILib:CreateWindow(titleText)
             end)
         end
 
+        -- AddToggle function
+        function Tab:AddToggle(toggleName, callback)
+            local toggleFrame = create("Frame", {
+                Size = UDim2.new(1, -10, 0, 30),
+                BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+                Parent = tabPage
+            })
+
+            local toggleButton = create("TextButton", {
+                Size = UDim2.new(0, 30, 0, 30),
+                BackgroundColor3 = Color3.fromRGB(255, 0, 0),
+                Text = "Off",
+                Font = Enum.Font.Gotham,
+                TextColor3 = Color3.fromRGB(255, 255, 255),
+                TextSize = 16,
+                Parent = toggleFrame
+            })
+
+            toggleButton.MouseButton1Click:Connect(function()
+                local currentState = toggleButton.Text == "Off"
+                toggleButton.Text = currentState and "On" or "Off"
+                if callback then
+                    pcall(callback, currentState)
+                end
+            end)
+        end
+
         return Tab
     end
 
