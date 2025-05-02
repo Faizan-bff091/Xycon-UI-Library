@@ -286,6 +286,14 @@ function UILib:CreateWindow(titleText)
                     dragging = true
                     dragStart = input.Position
                     startPos = sliderIndicator.Position
+                    -- Prevent buttons beneath the slider from being clicked
+                    for _, button in pairs(contentHolder:GetChildren()) do
+                        if button:IsA("TextButton") then
+                            button.TextButton.MouseButton1Click:Connect(function()
+                                input.UserInputType = Enum.UserInputType.MouseMovement
+                            end)
+                        end
+                    end
                 end
             end)
 
@@ -295,6 +303,7 @@ function UILib:CreateWindow(titleText)
                     local newX = math.clamp(startPos.X.Offset + delta, 0, sliderBar.Size.X.Offset)
                     sliderIndicator.Position = UDim2.new(0, newX, 0, 0)
 
+                    -- Calculate and update slider value
                     local sliderValue = math.floor((newX / sliderBar.Size.X.Offset) * (maxValue - minValue) + minValue)
                     sliderLabel.Text = name .. ": " .. sliderValue  -- Update the label text
 
