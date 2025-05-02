@@ -1,5 +1,4 @@
-
--- Xycon UI Library - Starter Version
+-- Xycon UI Library - Updated with Toggle
 local UILib = {}
 
 local TweenService = game:GetService("TweenService")
@@ -84,7 +83,7 @@ function UILib:CreateWindow(titleText)
             Parent = contentHolder
         })
 
-        local layout = create("UIListLayout", {
+        create("UIListLayout", {
             Parent = tabPage,
             Padding = UDim.new(0, 8)
         })
@@ -115,6 +114,46 @@ function UILib:CreateWindow(titleText)
             button.MouseButton1Click:Connect(function()
                 if callback then
                     pcall(callback)
+                end
+            end)
+        end
+
+        function Tab:AddToggle(toggleName, defaultState, callback)
+            local toggle = defaultState or false
+
+            local frame = create("Frame", {
+                Size = UDim2.new(1, -10, 0, 30),
+                BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+                Parent = tabPage
+            })
+            create("UICorner", {Parent = frame})
+
+            local label = create("TextLabel", {
+                Size = UDim2.new(1, -40, 1, 0),
+                Position = UDim2.new(0, 10, 0, 0),
+                BackgroundTransparency = 1,
+                Text = toggleName,
+                Font = Enum.Font.Gotham,
+                TextColor3 = Color3.fromRGB(255, 255, 255),
+                TextSize = 16,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                Parent = frame
+            })
+
+            local toggleBtn = create("TextButton", {
+                Size = UDim2.new(0, 20, 0, 20),
+                Position = UDim2.new(1, -30, 0.5, -10),
+                BackgroundColor3 = toggle and Color3.fromRGB(0, 255, 170) or Color3.fromRGB(70, 70, 70),
+                Text = "",
+                Parent = frame
+            })
+            create("UICorner", {Parent = toggleBtn})
+
+            toggleBtn.MouseButton1Click:Connect(function()
+                toggle = not toggle
+                toggleBtn.BackgroundColor3 = toggle and Color3.fromRGB(0, 255, 170) or Color3.fromRGB(70, 70, 70)
+                if callback then
+                    pcall(callback, toggle)
                 end
             end)
         end
