@@ -224,6 +224,64 @@ function UILib:CreateWindow(titleText)
             end)
         end
 
+        -- Add Slider to tab
+        function Tab:AddSlider(name, minValue, maxValue, defaultValue, callback)
+            local sliderFrame = create("Frame", {
+                Size = UDim2.new(1, -10, 0, 30),
+                BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+                Parent = tabPage
+            })
+            create("UICorner", {Parent = sliderFrame})
+
+            local sliderBar = create("Frame", {
+                Size = UDim2.new(0, 180, 0, 6),
+                Position = UDim2.new(0, 10, 0, 12),
+                BackgroundColor3 = Color3.fromRGB(200, 200, 200),
+                Parent = sliderFrame
+            })
+            create("UICorner", {Parent = sliderBar})
+
+            local sliderButton = create("TextButton", {
+                Size = UDim2.new(0, 20, 0, 20),
+                Position = UDim2.new(0, (defaultValue - minValue) / (maxValue - minValue) * sliderBar.AbsoluteSize.X, 0, -7),
+                BackgroundColor3 = Color3.fromRGB(0, 255, 255),
+                Text = "",
+                Parent = sliderBar
+            })
+            create("UICorner", {Parent = sliderButton})
+
+            local isDragging = false
+            local function updateSlider(value)
+                value = math.clamp(value, minValue, maxValue)
+                local normalizedValue = (value - minValue) / (maxValue - minValue)
+                sliderButton.Position = UDim2.new(normalizedValue, 0, 0, -7)
+                if callback then
+                    callback(value)
+                end
+            end
+
+            sliderButton.MouseButton1Down:Connect(function()
+                isDragging = true
+            end)
+
+            UserInputService.InputChanged:Connect(function(input)
+                if isDragging then
+                    local mousePos = input.Position.X
+                    local barPos = sliderBar.AbsolutePosition.X
+                    local newPos = math.clamp(mousePos - barPos, 0, sliderBar.AbsoluteSize.X)
+                    updateSlider(minValue + (newPos / sliderBar.AbsoluteSize.X) * (maxValue - minValue))
+                end
+            end)
+
+            UserInputService.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    isDragging = false
+                end
+            end)
+
+            return sliderFrame
+        end
+
         return Tab
     end
 
