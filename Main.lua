@@ -30,13 +30,16 @@ function UILib:CreateWindow(titleText)
 
     create("UICorner", {Parent = mainFrame})
 
+    -- Title TextLabel
     local title = create("TextLabel", {
-        Size = UDim2.new(1, -60, 0, 30),
+        Size = UDim2.new(1, -60, 0, 30), -- Adjusted size to make space for buttons
+        Position = UDim2.new(0, 0, 0, 0), -- Positioning to top-left
         BackgroundTransparency = 1,
         Text = titleText or "Xycon UI",
         TextColor3 = Color3.fromRGB(0, 255, 170),
         Font = Enum.Font.GothamBold,
         TextSize = 20,
+        TextXAlignment = Enum.TextXAlignment.Left, -- Left-align the text
         Parent = mainFrame
     })
 
