@@ -29,10 +29,6 @@ function UILib:CreateWindow(titleText)
         Name = "Main"
     })
 
-    -- Making the frame draggable
-    local dragger = Instance.new("UIDragDetector")
-    dragger.Parent = mainFrame
-
     -- Creating the top bar with title, minimize, and close buttons
     local titleBar = create("Frame", {
         Size = UDim2.new(1, 0, 0, 30),
