@@ -1,9 +1,8 @@
--- Xycon UI Library - Updated Version with Persistent Minimize Button and Key to Close UI
+-- Xycon UI Library - Minimize to Blue X Button Version
 local UILib = {}
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
 
 local function create(class, props)
     local inst = Instance.new(class)
@@ -20,28 +19,78 @@ function UILib:CreateWindow(titleText)
         ResetOnSpawn = false
     })
 
+    -- Main Frame
     local mainFrame = create("Frame", {
         Size = UDim2.new(0, 500, 0, 300),
         Position = UDim2.new(0.5, -250, 0.5, -150),
         BackgroundColor3 = Color3.fromRGB(25, 25, 25),
         BorderSizePixel = 0,
-        Parent = screenGui,
-        Name = "Main"
+        Name = "Main",
+        Parent = screenGui
     })
-
     create("UICorner", {Parent = mainFrame})
     create("UIStroke", {Parent = mainFrame, Color = Color3.fromRGB(0, 255, 170)})
 
+    -- Title Label
     local title = create("TextLabel", {
-        Size = UDim2.new(1, 0, 0, 30),
+        Size = UDim2.new(1, -60, 0, 30),
+        Position = UDim2.new(0, 0, 0, 0),
         BackgroundTransparency = 1,
         Text = titleText or "Xycon UI",
         TextColor3 = Color3.fromRGB(0, 255, 170),
         Font = Enum.Font.GothamBold,
         TextSize = 20,
+        TextXAlignment = Enum.TextXAlignment.Left,
         Parent = mainFrame
     })
 
+    -- Close Button (X)
+    local closeBtn = create("TextButton", {
+        Size = UDim2.new(0, 30, 0, 30),
+        Position = UDim2.new(1, -30, 0, 0),
+        Text = "X",
+        BackgroundColor3 = Color3.fromRGB(40, 40, 40),
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        Font = Enum.Font.GothamBold,
+        TextSize = 16,
+        Parent = mainFrame
+    })
+    create("UICorner", {Parent = closeBtn})
+
+    -- Small X button (to restore)
+    local smallXBtn = create("TextButton", {
+        Size = UDim2.new(0, 40, 0, 40),
+        Position = UDim2.new(0, 10, 0.5, -20),
+        BackgroundColor3 = Color3.fromRGB(0, 100, 255),
+        Text = "X",
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        Font = Enum.Font.GothamBold,
+        TextSize = 18,
+        Visible = false,
+        Parent = screenGui
+    })
+    create("UICorner", {Parent = smallXBtn})
+
+    closeBtn.MouseButton1Click:Connect(function()
+        mainFrame.Visible = false
+        smallXBtn.Visible = true
+    end)
+
+    smallXBtn.MouseButton1Click:Connect(function()
+        mainFrame.Visible = true
+        smallXBtn.Visible = false
+    end)
+
+    -- Keybind to toggle full UI with L
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if not gameProcessed and input.KeyCode == Enum.KeyCode.L then
+            local visible = not mainFrame.Visible
+            mainFrame.Visible = visible
+            smallXBtn.Visible = not visible
+        end
+    end)
+
+    -- Tab and content system
     local tabHolder = create("Frame", {
         Size = UDim2.new(0, 100, 1, -30),
         Position = UDim2.new(0, 0, 0, 30),
@@ -84,7 +133,7 @@ function UILib:CreateWindow(titleText)
             Parent = contentHolder
         })
 
-        local layout = create("UIListLayout", {
+        create("UIListLayout", {
             Parent = tabPage,
             Padding = UDim.new(0, 8)
         })
@@ -119,118 +168,10 @@ function UILib:CreateWindow(titleText)
             end)
         end
 
-        function Tab:AddToggle(toggleName, defaultState, callback)
-            local toggle = create("TextButton", {
-                Size = UDim2.new(1, -10, 0, 30),
-                BackgroundColor3 = Color3.fromRGB(45, 45, 45),
-                Text = toggleName .. (defaultState and " (On)" or " (Off)"),
-                Font = Enum.Font.Gotham,
-                TextColor3 = Color3.fromRGB(255, 255, 255),
-                TextSize = 16,
-                Parent = tabPage
-            })
-            create("UICorner", {Parent = toggle})
-
-            toggle.MouseButton1Click:Connect(function()
-                defaultState = not defaultState
-                toggle.Text = toggleName .. (defaultState and " (On)" or " (Off)")
-                if callback then
-                    callback(defaultState)
-                end
-            end)
-        end
-
         return Tab
     end
 
-    -- Close and Minimize Buttons
-    local function addMinimizeAndCloseButtons()
-        local closeButton = create("TextButton", {
-            Size = UDim2.new(0, 30, 0, 30),
-            Position = UDim2.new(1, -30, 0, 0),
-            BackgroundColor3 = Color3.fromRGB(255, 0, 0),
-            Text = "X",
-            Font = Enum.Font.GothamBold,
-            TextColor3 = Color3.fromRGB(255, 255, 255),
-            TextSize = 20,
-            Parent = mainFrame
-        })
-        create("UICorner", {Parent = closeButton})
-
-        closeButton.MouseButton1Click:Connect(function()
-            screenGui:Destroy()  -- Destroys the entire GUI
-        end)
-
-        local minimizeButton = create("TextButton", {
-            Size = UDim2.new(0, 30, 0, 30),
-            Position = UDim2.new(1, -60, 0, 0),
-            BackgroundColor3 = Color3.fromRGB(255, 255, 0),
-            Text = "-",
-            Font = Enum.Font.GothamBold,
-            TextColor3 = Color3.fromRGB(255, 255, 255),
-            TextSize = 20,
-            Parent = mainFrame
-        })
-        create("UICorner", {Parent = minimizeButton})
-
-        local isMinimized = false
-        minimizeButton.MouseButton1Click:Connect(function()
-            isMinimized = not isMinimized
-            -- Toggle the visibility of the tab content holder
-            contentHolder.Visible = not isMinimized
-        end)
-    end
-
-    -- Draggable UI Functionality
-    local dragInput, dragStart, startPos
-    local function dragUI(input)
-        local delta = input.Position - dragStart
-        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-
-    local function beginDrag(input)
-        dragStart = input.Position
-        startPos = mainFrame.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragInput:Disconnect()
-            end
-        end)
-        dragInput = input.InputChanged:Connect(dragUI)
-    end
-
-    mainFrame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            beginDrag(input)
-        end
-    end)
-
-    addMinimizeAndCloseButtons()
-
     return Window
 end
-
--- Automatically open and close UI with 'L' key press
-local screenGui -- Variable to store the reference to the GUI
-
-UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.L then
-        if screenGui then
-            screenGui:Destroy()  -- Close the UI if it's already open
-        else
-            -- Open the UI if it's not open
-            screenGui = UILib:CreateWindow("Xycon UI")
-            local tab = screenGui:CreateTab("Main")
-
-            tab:AddButton("Click Me", function()
-                print("Button was clicked!")
-            end)
-
-            tab:AddToggle("God Mode", false, function(state)
-                print("God Mode:", state and "Enabled" or "Disabled")
-            end)
-        end
-    end
-end)
 
 return UILib
