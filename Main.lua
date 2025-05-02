@@ -1,4 +1,4 @@
--- Xycon UI Library - Updated Version for Xeno Executor
+-- Xycon UI Library - Updated Version with Persistent Minimize Button
 local UILib = {}
 
 local TweenService = game:GetService("TweenService")
@@ -176,6 +176,7 @@ function UILib:CreateWindow(titleText)
         local isMinimized = false
         minimizeButton.MouseButton1Click:Connect(function()
             isMinimized = not isMinimized
+            -- Minimize only the content part (but keep the title and minimize/close buttons visible)
             contentHolder.Visible = not isMinimized
         end)
     end
@@ -208,5 +209,21 @@ function UILib:CreateWindow(titleText)
 
     return Window
 end
+
+-- Automatically open UI with 'L' key press
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.L then
+        local win = UILib:CreateWindow("Xycon UI")
+        local tab = win:CreateTab("Main")
+
+        tab:AddButton("Click Me", function()
+            print("Button was clicked!")
+        end)
+
+        tab:AddToggle("God Mode", false, function(state)
+            print("God Mode:", state and "Enabled" or "Disabled")
+        end)
+    end
+end)
 
 return UILib
