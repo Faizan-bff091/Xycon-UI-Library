@@ -1,4 +1,4 @@
--- Xycon UI Library - Updated with Draggable Window, Button Fix, and Close/Minimize Buttons
+-- Xycon UI Library - Updated with Draggable Window, Button Fix, Close/Minimize Buttons, Reopen Functionality, and AddToggle
 local UILib = {}
 
 local TweenService = game:GetService("TweenService")
@@ -116,7 +116,7 @@ function UILib:CreateWindow(titleText)
 
     -- Minimize Button Functionality
     minimizeButton.MouseButton1Click:Connect(function()
-        mainFrame.Visible = false  -- Hides the window but it stays draggable
+        mainFrame.Visible = false  -- Hides the window but keeps it draggable
     end)
 
     -- Close Button Functionality
@@ -124,8 +124,14 @@ function UILib:CreateWindow(titleText)
         screenGui:Destroy()  -- Completely destroys the UI
     end)
 
+    -- Reopen Window after Minimize
+    title.MouseButton1Click:Connect(function()
+        mainFrame.Visible = true  -- Makes the window visible again
+    end)
+
     local Window = {}
 
+    -- AddButton function
     function Window:CreateTab(name)
         local tabButton = create("TextButton", {
             Size = UDim2.new(1, 0, 0, 30),
@@ -161,6 +167,7 @@ function UILib:CreateWindow(titleText)
 
         local Tab = {}
 
+        -- AddButton function
         function Tab:AddButton(buttonName, callback)
             local button = create("TextButton", {
                 Size = UDim2.new(1, -10, 0, 30),
@@ -176,6 +183,48 @@ function UILib:CreateWindow(titleText)
             button.MouseButton1Click:Connect(function()
                 if callback then
                     pcall(callback)
+                end
+            end)
+        end
+
+        -- AddToggle function
+        function Tab:AddToggle(toggleName, defaultState, callback)
+            local toggleFrame = create("Frame", {
+                Size = UDim2.new(1, -10, 0, 30),
+                BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+                Parent = tabPage
+            })
+            create("UICorner", {Parent = toggleFrame})
+
+            local toggleButton = create("TextButton", {
+                Size = UDim2.new(0, 50, 0, 20),
+                Position = UDim2.new(1, -60, 0, 5),
+                BackgroundColor3 = Color3.fromRGB(0, 255, 170),
+                Font = Enum.Font.Gotham,
+                TextColor3 = Color3.fromRGB(255, 255, 255),
+                TextSize = 14,
+                Text = defaultState and "On" or "Off",
+                Parent = toggleFrame
+            })
+            create("UICorner", {Parent = toggleButton})
+
+            local toggleLabel = create("TextLabel", {
+                Size = UDim2.new(1, -70, 0, 30),
+                BackgroundTransparency = 1,
+                Text = toggleName,
+                TextColor3 = Color3.fromRGB(255, 255, 255),
+                Font = Enum.Font.Gotham,
+                TextSize = 16,
+                Parent = toggleFrame
+            })
+
+            local toggled = defaultState
+
+            toggleButton.MouseButton1Click:Connect(function()
+                toggled = not toggled
+                toggleButton.Text = toggled and "On" or "Off"
+                if callback then
+                    callback(toggled)
                 end
             end)
         end
