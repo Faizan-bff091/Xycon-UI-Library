@@ -1,4 +1,4 @@
--- Xycon UI Library - Updated with Draggable Window
+-- Xycon UI Library - Updated with Draggable Window, Button Fix, and Close/Minimize Buttons
 local UILib = {}
 
 local TweenService = game:GetService("TweenService")
@@ -39,6 +39,32 @@ function UILib:CreateWindow(titleText)
         TextSize = 20,
         Parent = mainFrame
     })
+
+    -- Minimize Button ( - )
+    local minimizeButton = create("TextButton", {
+        Size = UDim2.new(0, 30, 0, 30),
+        Position = UDim2.new(1, -35, 0, 5),
+        Text = "-",
+        BackgroundColor3 = Color3.fromRGB(255, 0, 0),
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        Font = Enum.Font.Gotham,
+        TextSize = 20,
+        Parent = mainFrame
+    })
+    create("UICorner", {Parent = minimizeButton})
+
+    -- Close Button ( X )
+    local closeButton = create("TextButton", {
+        Size = UDim2.new(0, 30, 0, 30),
+        Position = UDim2.new(1, -35, 0, 35),
+        Text = "X",
+        BackgroundColor3 = Color3.fromRGB(255, 0, 0),
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        Font = Enum.Font.Gotham,
+        TextSize = 20,
+        Parent = mainFrame
+    })
+    create("UICorner", {Parent = closeButton})
 
     local tabHolder = create("Frame", {
         Size = UDim2.new(0, 100, 1, -30),
@@ -86,6 +112,16 @@ function UILib:CreateWindow(titleText)
         if input == dragInput then
             updateDrag(input)
         end
+    end)
+
+    -- Minimize Button Functionality
+    minimizeButton.MouseButton1Click:Connect(function()
+        mainFrame.Visible = false  -- Hides the window but it stays draggable
+    end)
+
+    -- Close Button Functionality
+    closeButton.MouseButton1Click:Connect(function()
+        screenGui:Destroy()  -- Completely destroys the UI
     end)
 
     local Window = {}
@@ -140,46 +176,6 @@ function UILib:CreateWindow(titleText)
             button.MouseButton1Click:Connect(function()
                 if callback then
                     pcall(callback)
-                end
-            end)
-        end
-
-        function Tab:AddToggle(toggleName, defaultState, callback)
-            local toggle = defaultState or false
-
-            local frame = create("Frame", {
-                Size = UDim2.new(1, -10, 0, 30),
-                BackgroundColor3 = Color3.fromRGB(45, 45, 45),
-                Parent = tabPage
-            })
-            create("UICorner", {Parent = frame})
-
-            local label = create("TextLabel", {
-                Size = UDim2.new(1, -40, 1, 0),
-                Position = UDim2.new(0, 10, 0, 0),
-                BackgroundTransparency = 1,
-                Text = toggleName,
-                Font = Enum.Font.Gotham,
-                TextColor3 = Color3.fromRGB(255, 255, 255),
-                TextSize = 16,
-                TextXAlignment = Enum.TextXAlignment.Left,
-                Parent = frame
-            })
-
-            local toggleBtn = create("TextButton", {
-                Size = UDim2.new(0, 20, 0, 20),
-                Position = UDim2.new(1, -30, 0.5, -10),
-                BackgroundColor3 = toggle and Color3.fromRGB(0, 255, 170) or Color3.fromRGB(70, 70, 70),
-                Text = "",
-                Parent = frame
-            })
-            create("UICorner", {Parent = toggleBtn})
-
-            toggleBtn.MouseButton1Click:Connect(function()
-                toggle = not toggle
-                toggleBtn.BackgroundColor3 = toggle and Color3.fromRGB(0, 255, 170) or Color3.fromRGB(70, 70, 70)
-                if callback then
-                    pcall(callback, toggle)
                 end
             end)
         end
