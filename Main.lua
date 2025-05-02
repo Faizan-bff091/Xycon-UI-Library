@@ -227,28 +227,16 @@ function UILib:CreateWindow(titleText)
         -- Add slider method
         function Tab:AddSlider(name, minValue, maxValue, defaultValue, increment, callback)
             local sliderFrame = create("Frame", {
-                Size = UDim2.new(1, -10, 0, 60),  -- Increased height to accommodate the label and slider
+                Size = UDim2.new(1, -10, 0, 70),  -- Increased height to accommodate the label and slider
                 BackgroundColor3 = Color3.fromRGB(45, 45, 45),
                 Parent = tabPage
             })
             create("UICorner", {Parent = sliderFrame})
 
-            -- Slider label
-            local sliderLabel = create("TextLabel", {
-                Size = UDim2.new(1, 0, 0, 20),
-                Position = UDim2.new(0, 0, 0, 0),  -- Positioned at the top of the slider frame
-                BackgroundTransparency = 1,
-                Text = name .. ": " .. defaultValue,
-                TextColor3 = Color3.fromRGB(255, 255, 255),
-                Font = Enum.Font.Gotham,
-                TextSize = 16,
-                Parent = sliderFrame
-            })
-
-            -- Slider bar below the label
+            -- Slider bar
             local sliderBar = create("Frame", {
                 Size = UDim2.new(1, 0, 0, 10),
-                Position = UDim2.new(0, 0, 0, 25),  -- Positioned below the label
+                Position = UDim2.new(0, 0, 0, 0),  -- Positioned at the top of the slider frame
                 BackgroundColor3 = Color3.fromRGB(75, 75, 75),
                 Parent = sliderFrame
             })
@@ -259,6 +247,18 @@ function UILib:CreateWindow(titleText)
                 Size = UDim2.new(0, 10, 1, 0),
                 BackgroundColor3 = Color3.fromRGB(0, 255, 170),
                 Parent = sliderBar
+            })
+
+            -- Slider label (positioned below the slider bar)
+            local sliderLabel = create("TextLabel", {
+                Size = UDim2.new(1, 0, 0, 20),
+                Position = UDim2.new(0, 0, 0, 15),  -- Positioned below the slider bar
+                BackgroundTransparency = 1,
+                Text = name .. ": " .. defaultValue,
+                TextColor3 = Color3.fromRGB(255, 255, 255),
+                Font = Enum.Font.Gotham,
+                TextSize = 16,
+                Parent = sliderFrame
             })
 
             -- Dragging logic
