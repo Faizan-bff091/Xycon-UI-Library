@@ -1,4 +1,4 @@
--- Xycon UI Library - Updated with Draggable Window, Button Fix, Close/Minimize Buttons, Reopen Functionality, and AddToggle
+-- Xycon UI Library - Updated with Draggable Window, Button Fix, Close/Minimize Buttons, Reopen Functionality, AddTab, AddButton, AddToggle, and Keybinding (L key)
 local UILib = {}
 
 local TweenService = game:GetService("TweenService")
@@ -131,6 +131,17 @@ function UILib:CreateWindow(titleText)
     -- Reopen Window after Minimize
     title.MouseButton1Click:Connect(function()
         mainFrame.Visible = true  -- Makes the window visible again
+    end)
+
+    -- Keybinding (L key) to toggle visibility
+    local windowOpen = false
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if not gameProcessed and input.UserInputType == Enum.UserInputType.Keyboard then
+            if input.KeyCode == Enum.KeyCode.L then
+                windowOpen = not windowOpen
+                mainFrame.Visible = windowOpen
+            end
+        end
     end)
 
     local Window = {}
