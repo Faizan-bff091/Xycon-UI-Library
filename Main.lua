@@ -224,17 +224,19 @@ function UILib:CreateWindow(titleText)
             end)
         end
 
-        -- Add the AddSlider function here
+        -- Add slider method
         function Tab:AddSlider(name, minValue, maxValue, defaultValue, increment, callback)
             local sliderFrame = create("Frame", {
-                Size = UDim2.new(1, -10, 0, 40),
+                Size = UDim2.new(1, -10, 0, 60),  -- Increased height to accommodate the label and slider
                 BackgroundColor3 = Color3.fromRGB(45, 45, 45),
                 Parent = tabPage
             })
             create("UICorner", {Parent = sliderFrame})
 
+            -- Slider label
             local sliderLabel = create("TextLabel", {
                 Size = UDim2.new(1, 0, 0, 20),
+                Position = UDim2.new(0, 0, 0, 0),  -- Positioned at the top of the slider frame
                 BackgroundTransparency = 1,
                 Text = name .. ": " .. defaultValue,
                 TextColor3 = Color3.fromRGB(255, 255, 255),
@@ -243,20 +245,23 @@ function UILib:CreateWindow(titleText)
                 Parent = sliderFrame
             })
 
+            -- Slider bar below the label
             local sliderBar = create("Frame", {
                 Size = UDim2.new(1, 0, 0, 10),
+                Position = UDim2.new(0, 0, 0, 25),  -- Positioned below the label
                 BackgroundColor3 = Color3.fromRGB(75, 75, 75),
                 Parent = sliderFrame
             })
             create("UICorner", {Parent = sliderBar})
 
+            -- Slider indicator (the draggable part)
             local sliderIndicator = create("Frame", {
                 Size = UDim2.new(0, 10, 1, 0),
                 BackgroundColor3 = Color3.fromRGB(0, 255, 170),
                 Parent = sliderBar
             })
 
-            -- Dragging the slider
+            -- Dragging logic
             local dragging = false
             local dragStart, startPos
 
@@ -275,7 +280,7 @@ function UILib:CreateWindow(titleText)
                     sliderIndicator.Position = UDim2.new(0, newX, 0, 0)
 
                     local sliderValue = math.floor((newX / sliderBar.Size.X.Offset) * (maxValue - minValue) + minValue)
-                    sliderLabel.Text = name .. ": " .. sliderValue
+                    sliderLabel.Text = name .. ": " .. sliderValue  -- Update the label text
 
                     if callback then
                         pcall(callback, sliderValue)
