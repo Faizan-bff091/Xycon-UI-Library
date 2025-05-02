@@ -98,6 +98,7 @@ function UILib:CreateWindow(titleText)
         mainFrame.Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X, framePos.Y.Scale, framePos.Y.Offset + delta.Y)
     end
 
+    -- Dragging logic for the title bar
     title.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragInput = input
