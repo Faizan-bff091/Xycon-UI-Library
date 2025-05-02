@@ -1,4 +1,4 @@
--- Xycon UI Library - Updated with Toggle
+-- Xycon UI Library - Updated with Draggable Window
 local UILib = {}
 
 local TweenService = game:GetService("TweenService")
@@ -29,7 +29,6 @@ function UILib:CreateWindow(titleText)
     })
 
     create("UICorner", {Parent = mainFrame})
-    create("UIStroke", {Parent = mainFrame, Color = Color3.fromRGB(0, 255, 170)})
 
     local title = create("TextLabel", {
         Size = UDim2.new(1, 0, 0, 30),
@@ -61,6 +60,33 @@ function UILib:CreateWindow(titleText)
         BackgroundTransparency = 1,
         Parent = mainFrame
     })
+
+    -- Draggable Window Logic
+    local dragInput, mousePos, framePos
+
+    local function updateDrag(input)
+        local delta = input.Position - mousePos
+        mainFrame.Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X, framePos.Y.Scale, framePos.Y.Offset + delta.Y)
+    end
+
+    title.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragInput = input
+            mousePos = input.Position
+            framePos = mainFrame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragInput = nil
+                end
+            end)
+        end
+    end)
+
+    title.InputChanged:Connect(function(input)
+        if input == dragInput then
+            updateDrag(input)
+        end
+    end)
 
     local Window = {}
 
