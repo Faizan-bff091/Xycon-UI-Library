@@ -1,4 +1,3 @@
--- Xycon UI Library - Finalized Version
 local UILib = {}
 
 local TweenService = game:GetService("TweenService")
@@ -17,8 +16,10 @@ function UILib:CreateWindow(titleText)
     local screenGui = create("ScreenGui", {
         Name = "XyconUI",
         Parent = CoreGui,
-        ResetOnSpawn = false,
+        ResetOnSpawn = false
     })
+
+    local dragConnection = nil
 
     local mainFrame = create("Frame", {
         Size = UDim2.new(0, 500, 0, 300),
@@ -26,14 +27,13 @@ function UILib:CreateWindow(titleText)
         BackgroundColor3 = Color3.fromRGB(25, 25, 25),
         BorderSizePixel = 0,
         Name = "Main",
-        Parent = screenGui,
+        Parent = screenGui
     })
-
     create("UICorner", {Parent = mainFrame})
     create("UIStroke", {Parent = mainFrame, Color = Color3.fromRGB(0, 255, 170)})
 
     local title = create("TextLabel", {
-        Size = UDim2.new(1, -60, 0, 30),
+        Size = UDim2.new(1, -50, 0, 30),
         BackgroundTransparency = 1,
         Text = titleText or "Xycon UI",
         TextColor3 = Color3.fromRGB(0, 255, 170),
@@ -41,60 +41,22 @@ function UILib:CreateWindow(titleText)
         TextSize = 20,
         Parent = mainFrame,
         Name = "Title",
+        Position = UDim2.new(0, 10, 0, 0),
+        TextXAlignment = Enum.TextXAlignment.Left
     })
 
+    -- Red X button to minimize
     local closeButton = create("TextButton", {
         Size = UDim2.new(0, 30, 0, 30),
-        Position = UDim2.new(1, -30, 0, 0),
-        BackgroundColor3 = Color3.fromRGB(255, 0, 0),
+        Position = UDim2.new(1, -35, 0, 0),
+        BackgroundColor3 = Color3.fromRGB(255, 50, 50),
         Text = "X",
         Font = Enum.Font.GothamBold,
-        TextColor3 = Color3.new(1, 1, 1),
-        TextSize = 20,
-        Parent = mainFrame,
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        TextSize = 18,
+        Parent = mainFrame
     })
     create("UICorner", {Parent = closeButton})
-
-    local miniButton = create("TextButton", {
-        Size = UDim2.new(0, 30, 0, 30),
-        Position = UDim2.new(1, -60, 0, 0),
-        BackgroundColor3 = Color3.fromRGB(0, 100, 255),
-        Text = "-",
-        Font = Enum.Font.GothamBold,
-        TextColor3 = Color3.new(1, 1, 1),
-        TextSize = 20,
-        Parent = mainFrame,
-    })
-    create("UICorner", {Parent = miniButton})
-
-    local startButton = create("TextButton", {
-        Size = UDim2.new(0, 50, 0, 50),
-        Position = UDim2.new(0, 10, 0.5, -25),
-        BackgroundColor3 = Color3.fromRGB(0, 100, 255),
-        Text = "X",
-        Font = Enum.Font.GothamBold,
-        TextColor3 = Color3.new(1, 1, 1),
-        TextSize = 20,
-        Parent = screenGui,
-        Visible = false
-    })
-    create("UICorner", {Parent = startButton})
-
-    closeButton.MouseButton1Click:Connect(function()
-        mainFrame.Visible = false
-        startButton.Visible = true
-    end)
-
-    startButton.MouseButton1Click:Connect(function()
-        mainFrame.Visible = true
-        startButton.Visible = false
-    end)
-
-    UserInputService.InputBegan:Connect(function(input)
-        if input.KeyCode == Enum.KeyCode.L then
-            screenGui.Enabled = not screenGui.Enabled
-        end
-    end)
 
     local tabHolder = create("Frame", {
         Size = UDim2.new(0, 100, 1, -30),
@@ -117,6 +79,72 @@ function UILib:CreateWindow(titleText)
         Parent = mainFrame
     })
 
+    -- Small blue X button for restore
+    local minimizedButton = create("TextButton", {
+        Size = UDim2.new(0, 40, 0, 40),
+        Position = UDim2.new(0, 10, 0.5, -20),
+        BackgroundColor3 = Color3.fromRGB(0, 170, 255),
+        Text = "X",
+        TextColor3 = Color3.new(1, 1, 1),
+        Font = Enum.Font.GothamBold,
+        TextSize = 18,
+        Visible = false,
+        Parent = screenGui
+    })
+    create("UICorner", {Parent = minimizedButton})
+
+    -- Dragging support
+    local dragging = false
+    local dragInput, dragStart, startPos
+
+    title.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = mainFrame.Position
+        end
+    end)
+
+    title.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            mainFrame.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+
+    closeButton.MouseButton1Click:Connect(function()
+        mainFrame.Visible = false
+        minimizedButton.Visible = true
+    end)
+
+    minimizedButton.MouseButton1Click:Connect(function()
+        mainFrame.Visible = true
+        minimizedButton.Visible = false
+    end)
+
+    UserInputService.InputBegan:Connect(function(input)
+        if input.KeyCode == Enum.KeyCode.L then
+            screenGui.Enabled = not screenGui.Enabled
+        end
+    end)
+
     local Window = {}
 
     function Window:CreateTab(name)
@@ -138,9 +166,9 @@ function UILib:CreateWindow(titleText)
             Parent = contentHolder
         })
 
-        local layout = create("UIListLayout", {
+        create("UIListLayout", {
             Parent = tabPage,
-            Padding = UDim.new(0, 8)
+            Padding = UDim.new(0, 6)
         })
 
         tabButton.MouseButton1Click:Connect(function()
@@ -165,6 +193,7 @@ function UILib:CreateWindow(titleText)
                 Parent = tabPage
             })
             create("UICorner", {Parent = button})
+
             button.MouseButton1Click:Connect(function()
                 if callback then
                     pcall(callback)
@@ -172,22 +201,23 @@ function UILib:CreateWindow(titleText)
             end)
         end
 
-        function Tab:AddToggle(toggleName, default, callback)
+        function Tab:AddToggle(name, default, callback)
             local toggle = create("TextButton", {
                 Size = UDim2.new(1, -10, 0, 30),
                 BackgroundColor3 = Color3.fromRGB(45, 45, 45),
-                Text = toggleName .. ": " .. (default and "ON" or "OFF"),
+                Text = name .. ": " .. (default and "ON" or "OFF"),
                 Font = Enum.Font.Gotham,
-                TextColor3 = Color3.fromRGB(255, 255, 255),
+                TextColor3 = Color3.new(1, 1, 1),
                 TextSize = 16,
                 Parent = tabPage
             })
             create("UICorner", {Parent = toggle})
 
             local toggled = default
+
             toggle.MouseButton1Click:Connect(function()
                 toggled = not toggled
-                toggle.Text = toggleName .. ": " .. (toggled and "ON" or "OFF")
+                toggle.Text = name .. ": " .. (toggled and "ON" or "OFF")
                 if callback then
                     pcall(callback, toggled)
                 end
