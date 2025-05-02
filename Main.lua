@@ -31,7 +31,7 @@ function UILib:CreateWindow(titleText)
     create("UICorner", {Parent = mainFrame})
 
     local title = create("TextLabel", {
-        Size = UDim2.new(1, 0, 0, 30),
+        Size = UDim2.new(1, -60, 0, 30),
         BackgroundTransparency = 1,
         Text = titleText or "Xycon UI",
         TextColor3 = Color3.fromRGB(0, 255, 170),
@@ -75,7 +75,7 @@ function UILib:CreateWindow(titleText)
     })
     create("UICorner", {Parent = tabHolder})
 
-    local tabLayout = create("UIListLayout", {
+    create("UIListLayout", {
         Parent = tabHolder,
         SortOrder = Enum.SortOrder.LayoutOrder
     })
