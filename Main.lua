@@ -242,6 +242,13 @@ function UILib:CreateWindow(titleText)
             })
             create("UICorner", {Parent = sliderBar})
 
+            -- Filled slider bar (shows progress)
+            local sliderFill = create("Frame", {
+                Size = UDim2.new(0, 0, 1, 0),  -- Initially 0% width
+                BackgroundColor3 = Color3.fromRGB(0, 255, 170),
+                Parent = sliderBar
+            })
+
             -- Slider indicator (the draggable part)
             local sliderIndicator = create("Frame", {
                 Size = UDim2.new(0, 10, 1, 0),
@@ -260,6 +267,15 @@ function UILib:CreateWindow(titleText)
                 TextSize = 16,
                 Parent = sliderFrame
             })
+
+            -- Update the fill based on the slider's value
+            local function updateFill(sliderValue)
+                local fillWidth = (sliderValue - minValue) / (maxValue - minValue)
+                sliderFill.Size = UDim2.new(fillWidth, 0, 1, 0)
+            end
+
+            -- Set initial fill
+            updateFill(defaultValue)
 
             -- Dragging logic
             local dragging = false
@@ -281,6 +297,9 @@ function UILib:CreateWindow(titleText)
 
                     local sliderValue = math.floor((newX / sliderBar.Size.X.Offset) * (maxValue - minValue) + minValue)
                     sliderLabel.Text = name .. ": " .. sliderValue  -- Update the label text
+
+                    -- Update the progress fill
+                    updateFill(sliderValue)
 
                     if callback then
                         pcall(callback, sliderValue)
