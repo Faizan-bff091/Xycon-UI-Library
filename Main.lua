@@ -1,8 +1,9 @@
--- Xycon UI Library - Minimize to Blue X Button Version
+-- Xycon UI Library - Finalized Version
 local UILib = {}
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
 
 local function create(class, props)
     local inst = Instance.new(class)
@@ -15,82 +16,86 @@ end
 function UILib:CreateWindow(titleText)
     local screenGui = create("ScreenGui", {
         Name = "XyconUI",
-        Parent = game:GetService("CoreGui"),
-        ResetOnSpawn = false
+        Parent = CoreGui,
+        ResetOnSpawn = false,
     })
 
-    -- Main Frame
     local mainFrame = create("Frame", {
         Size = UDim2.new(0, 500, 0, 300),
         Position = UDim2.new(0.5, -250, 0.5, -150),
         BackgroundColor3 = Color3.fromRGB(25, 25, 25),
         BorderSizePixel = 0,
         Name = "Main",
-        Parent = screenGui
+        Parent = screenGui,
     })
+
     create("UICorner", {Parent = mainFrame})
     create("UIStroke", {Parent = mainFrame, Color = Color3.fromRGB(0, 255, 170)})
 
-    -- Title Label
     local title = create("TextLabel", {
         Size = UDim2.new(1, -60, 0, 30),
-        Position = UDim2.new(0, 0, 0, 0),
         BackgroundTransparency = 1,
         Text = titleText or "Xycon UI",
         TextColor3 = Color3.fromRGB(0, 255, 170),
         Font = Enum.Font.GothamBold,
         TextSize = 20,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = mainFrame
+        Parent = mainFrame,
+        Name = "Title",
     })
 
-    -- Close Button (X)
-    local closeBtn = create("TextButton", {
+    local closeButton = create("TextButton", {
         Size = UDim2.new(0, 30, 0, 30),
         Position = UDim2.new(1, -30, 0, 0),
+        BackgroundColor3 = Color3.fromRGB(255, 0, 0),
         Text = "X",
-        BackgroundColor3 = Color3.fromRGB(40, 40, 40),
-        TextColor3 = Color3.fromRGB(255, 255, 255),
         Font = Enum.Font.GothamBold,
-        TextSize = 16,
-        Parent = mainFrame
+        TextColor3 = Color3.new(1, 1, 1),
+        TextSize = 20,
+        Parent = mainFrame,
     })
-    create("UICorner", {Parent = closeBtn})
+    create("UICorner", {Parent = closeButton})
 
-    -- Small X button (to restore)
-    local smallXBtn = create("TextButton", {
-        Size = UDim2.new(0, 40, 0, 40),
-        Position = UDim2.new(0, 10, 0.5, -20),
+    local miniButton = create("TextButton", {
+        Size = UDim2.new(0, 30, 0, 30),
+        Position = UDim2.new(1, -60, 0, 0),
+        BackgroundColor3 = Color3.fromRGB(0, 100, 255),
+        Text = "-",
+        Font = Enum.Font.GothamBold,
+        TextColor3 = Color3.new(1, 1, 1),
+        TextSize = 20,
+        Parent = mainFrame,
+    })
+    create("UICorner", {Parent = miniButton})
+
+    local startButton = create("TextButton", {
+        Size = UDim2.new(0, 50, 0, 50),
+        Position = UDim2.new(0, 10, 0.5, -25),
         BackgroundColor3 = Color3.fromRGB(0, 100, 255),
         Text = "X",
-        TextColor3 = Color3.fromRGB(255, 255, 255),
         Font = Enum.Font.GothamBold,
-        TextSize = 18,
-        Visible = false,
-        Parent = screenGui
+        TextColor3 = Color3.new(1, 1, 1),
+        TextSize = 20,
+        Parent = screenGui,
+        Visible = false
     })
-    create("UICorner", {Parent = smallXBtn})
+    create("UICorner", {Parent = startButton})
 
-    closeBtn.MouseButton1Click:Connect(function()
+    closeButton.MouseButton1Click:Connect(function()
         mainFrame.Visible = false
-        smallXBtn.Visible = true
+        startButton.Visible = true
     end)
 
-    smallXBtn.MouseButton1Click:Connect(function()
+    startButton.MouseButton1Click:Connect(function()
         mainFrame.Visible = true
-        smallXBtn.Visible = false
+        startButton.Visible = false
     end)
 
-    -- Keybind to toggle full UI with L
-    UserInputService.InputBegan:Connect(function(input, gameProcessed)
-        if not gameProcessed and input.KeyCode == Enum.KeyCode.L then
-            local visible = not mainFrame.Visible
-            mainFrame.Visible = visible
-            smallXBtn.Visible = not visible
+    UserInputService.InputBegan:Connect(function(input)
+        if input.KeyCode == Enum.KeyCode.L then
+            screenGui.Enabled = not screenGui.Enabled
         end
     end)
 
-    -- Tab and content system
     local tabHolder = create("Frame", {
         Size = UDim2.new(0, 100, 1, -30),
         Position = UDim2.new(0, 0, 0, 30),
@@ -133,7 +138,7 @@ function UILib:CreateWindow(titleText)
             Parent = contentHolder
         })
 
-        create("UIListLayout", {
+        local layout = create("UIListLayout", {
             Parent = tabPage,
             Padding = UDim.new(0, 8)
         })
@@ -160,10 +165,31 @@ function UILib:CreateWindow(titleText)
                 Parent = tabPage
             })
             create("UICorner", {Parent = button})
-
             button.MouseButton1Click:Connect(function()
                 if callback then
                     pcall(callback)
+                end
+            end)
+        end
+
+        function Tab:AddToggle(toggleName, default, callback)
+            local toggle = create("TextButton", {
+                Size = UDim2.new(1, -10, 0, 30),
+                BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+                Text = toggleName .. ": " .. (default and "ON" or "OFF"),
+                Font = Enum.Font.Gotham,
+                TextColor3 = Color3.fromRGB(255, 255, 255),
+                TextSize = 16,
+                Parent = tabPage
+            })
+            create("UICorner", {Parent = toggle})
+
+            local toggled = default
+            toggle.MouseButton1Click:Connect(function()
+                toggled = not toggled
+                toggle.Text = toggleName .. ": " .. (toggled and "ON" or "OFF")
+                if callback then
+                    pcall(callback, toggled)
                 end
             end)
         end
