@@ -1,4 +1,4 @@
--- Xycon UI Library - Updated Version with Persistent Minimize Button
+-- Xycon UI Library - Updated Version with Persistent Minimize Button and Key to Close UI
 local UILib = {}
 
 local TweenService = game:GetService("TweenService")
@@ -176,7 +176,7 @@ function UILib:CreateWindow(titleText)
         local isMinimized = false
         minimizeButton.MouseButton1Click:Connect(function()
             isMinimized = not isMinimized
-            -- Minimize only the content part (but keep the title and minimize/close buttons visible)
+            -- Toggle the visibility of the tab content holder
             contentHolder.Visible = not isMinimized
         end)
     end
@@ -210,19 +210,26 @@ function UILib:CreateWindow(titleText)
     return Window
 end
 
--- Automatically open UI with 'L' key press
+-- Automatically open and close UI with 'L' key press
+local screenGui -- Variable to store the reference to the GUI
+
 UserInputService.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.L then
-        local win = UILib:CreateWindow("Xycon UI")
-        local tab = win:CreateTab("Main")
+        if screenGui then
+            screenGui:Destroy()  -- Close the UI if it's already open
+        else
+            -- Open the UI if it's not open
+            screenGui = UILib:CreateWindow("Xycon UI")
+            local tab = screenGui:CreateTab("Main")
 
-        tab:AddButton("Click Me", function()
-            print("Button was clicked!")
-        end)
+            tab:AddButton("Click Me", function()
+                print("Button was clicked!")
+            end)
 
-        tab:AddToggle("God Mode", false, function(state)
-            print("God Mode:", state and "Enabled" or "Disabled")
-        end)
+            tab:AddToggle("God Mode", false, function(state)
+                print("God Mode:", state and "Enabled" or "Disabled")
+            end)
+        end
     end
 end)
 
